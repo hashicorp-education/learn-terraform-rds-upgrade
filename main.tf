@@ -56,7 +56,6 @@ resource "aws_security_group" "rds" {
 resource "aws_db_parameter_group" "education" {
   name_prefix = "${random_pet.name.id}-education"
   family      = "postgres15"
-  #  family      = "postgres16"
 
   parameter {
     name  = "log_connections"
@@ -69,13 +68,12 @@ resource "aws_db_parameter_group" "education" {
 }
 
 resource "aws_db_instance" "education" {
-  identifier        = "${random_pet.name.id}-education"
-  instance_class    = "db.t3.micro"
-  allocated_storage = 10
-  apply_immediately = true
-  engine            = "postgres"
-  engine_version    = "15"
-  #  engine_version              = "16"
+  identifier                  = "${random_pet.name.id}-education"
+  instance_class              = "db.t3.micro"
+  allocated_storage           = 10
+  apply_immediately           = true
+  engine                      = "postgres"
+  engine_version              = "15"
   username                    = "edu"
   password_wo                 = var.db_password
   allow_major_version_upgrade = true
@@ -86,8 +84,3 @@ resource "aws_db_instance" "education" {
   skip_final_snapshot         = true
   backup_retention_period     = 1
 }
-
-# resource "aws_db_snapshot" "pre_16_upgrade" {
-#   db_instance_identifier = aws_db_instance.education.identifier
-#   db_snapshot_identifier = "pre-16-upgrade-backup-${random_pet.name.id}"
-# }
