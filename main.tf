@@ -15,9 +15,9 @@ data "aws_availability_zones" "available" {}
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "5.8.0"
+  version = "5.19.0"
 
-  name                 = "education"
+  name                 = "${random_pet.name.id}-education"
   cidr                 = "10.0.0.0/16"
   azs                  = data.aws_availability_zones.available.names
   public_subnets       = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
@@ -32,14 +32,10 @@ resource "random_pet" "name" {
 resource "aws_db_subnet_group" "education" {
   name       = "${random_pet.name.id}-education"
   subnet_ids = module.vpc.public_subnets
-
-  tags = {
-    Name = "Education"
-  }
 }
 
 resource "aws_security_group" "rds" {
-  name   = "${random_pet.name.id}_education_rds"
+  name   = "${random_pet.name.id}-education"
   vpc_id = module.vpc.vpc_id
 
   ingress {
@@ -55,32 +51,33 @@ resource "aws_security_group" "rds" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  tags = {
-    Name = "education_rds"
-  }
 }
 
 resource "aws_db_parameter_group" "education" {
   name_prefix = "${random_pet.name.id}-education"
   family      = "postgres15"
+  #  family      = "postgres16"
 
   parameter {
     name  = "log_connections"
     value = "1"
   }
 
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_db_instance" "education" {
-  identifier                  = "${random_pet.name.id}education"
-  instance_class              = "db.t3.micro"
-  allocated_storage           = 10
-  apply_immediately           = true
-  engine                      = "postgres"
-  engine_version              = "15"
+  identifier        = "${random_pet.name.id}-education"
+  instance_class    = "db.t3.micro"
+  allocated_storage = 10
+  apply_immediately = true
+  engine            = "postgres"
+  engine_version    = "15"
+  #  engine_version              = "16"
   username                    = "edu"
-  password                    = var.db_password
+  password_wo                 = var.db_password
   allow_major_version_upgrade = true
   db_subnet_group_name        = aws_db_subnet_group.education.name
   vpc_security_group_ids      = [aws_security_group.rds.id]
@@ -89,3 +86,8 @@ resource "aws_db_instance" "education" {
   skip_final_snapshot         = true
   backup_retention_period     = 1
 }
+
+# resource "aws_db_snapshot" "pre_16_upgrade" {
+#   db_instance_identifier = aws_db_instance.education.identifier
+#   db_snapshot_identifier = "pre-16-upgrade-backup-${random_pet.name.id}"
+# }
