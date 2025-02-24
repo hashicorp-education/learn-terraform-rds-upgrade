@@ -64,7 +64,8 @@ resource "aws_db_parameter_group" "education" {
 }
 
 ephemeral "random_password" "db_password" {
-  length = 16
+  length  = 16
+  special = false
 }
 
 resource "aws_db_instance" "education" {
