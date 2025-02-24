@@ -61,6 +61,10 @@ resource "aws_db_parameter_group" "education" {
     name  = "log_connections"
     value = "1"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 ephemeral "random_password" "db_password" {
