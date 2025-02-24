@@ -61,10 +61,10 @@ resource "aws_db_parameter_group" "education" {
     name  = "log_connections"
     value = "1"
   }
+}
 
-  lifecycle {
-    create_before_destroy = true
-  }
+ephemeral "random_password" "db_password" {
+  length = 16
 }
 
 resource "aws_db_instance" "education" {
@@ -75,7 +75,7 @@ resource "aws_db_instance" "education" {
   engine                      = "postgres"
   engine_version              = "15"
   username                    = "edu"
-  password_wo                 = var.db_password
+  password_wo                 = ephemeral.random_password.db_password.result
   allow_major_version_upgrade = true
   db_subnet_group_name        = aws_db_subnet_group.education.name
   vpc_security_group_ids      = [aws_security_group.rds.id]
@@ -83,4 +83,12 @@ resource "aws_db_instance" "education" {
   publicly_accessible         = true
   skip_final_snapshot         = true
   backup_retention_period     = 1
+}
+
+resource "aws_ssm_parameter" "secret" {
+  name             = "/education/database/password/master"
+  description      = "Password for RDS database."
+  type             = "SecureString"
+  value_wo         = ephemeral.random_password.db_password.result
+  value_wo_version = 1
 }

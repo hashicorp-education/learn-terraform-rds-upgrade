@@ -5,9 +5,3 @@ variable "region" {
   description = "AWS region for all resources."
   default     = "us-east-2"
 }
-
-variable "db_password" {
-  description = "RDS user password."
-  default     = ""
-  ephemeral   = true
-}
