@@ -72,6 +72,12 @@ ephemeral "random_password" "db_password" {
   special = false
 }
 
+locals {
+  # Increment db_password_version to update the DB password and store the new
+  # password in SSM.
+  db_password_version = 1
+}
+
 resource "aws_db_instance" "education" {
   identifier                  = "${random_pet.name.id}-education"
   instance_class              = "db.t3.micro"
@@ -81,7 +87,7 @@ resource "aws_db_instance" "education" {
   engine_version              = "15"
   username                    = "edu"
   password_wo                 = ephemeral.random_password.db_password.result
-  password_wo_version         = 1
+  password_wo_version         = local.db_password_version
   allow_major_version_upgrade = true
   db_subnet_group_name        = aws_db_subnet_group.education.name
   vpc_security_group_ids      = [aws_security_group.rds.id]
@@ -96,5 +102,5 @@ resource "aws_ssm_parameter" "secret" {
   description      = "Password for RDS database."
   type             = "SecureString"
   value_wo         = ephemeral.random_password.db_password.result
-  value_wo_version = 1
+  value_wo_version = local.db_password_version
 }
