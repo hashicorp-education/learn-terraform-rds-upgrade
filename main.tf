@@ -81,6 +81,7 @@ resource "aws_db_instance" "education" {
   engine_version              = "15"
   username                    = "edu"
   password_wo                 = ephemeral.random_password.db_password.result
+  password_wo_version         = 1
   allow_major_version_upgrade = true
   db_subnet_group_name        = aws_db_subnet_group.education.name
   vpc_security_group_ids      = [aws_security_group.rds.id]
