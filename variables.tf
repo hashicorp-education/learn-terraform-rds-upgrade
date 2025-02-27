@@ -2,11 +2,6 @@
 # SPDX-License-Identifier: MPL-2.0
 
 variable "region" {
+  description = "AWS region for all resources."
   default     = "us-east-2"
-  description = "AWS region"
-}
-
-variable "db_password" {
-  description = "RDS root user password"
-  sensitive   = true
 }
